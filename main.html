@@ -1,40 +1,83 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const outputTable = document.getElementById("output");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promise Table</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        table {
+            width: 50%;
+            margin: auto;
+            border-collapse: collapse;
+            border: 1px solid #ddd;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
 
-    // Function to create a promise that resolves after a random delay between 1 and 3 seconds
-    function createPromise(id) {
-        const delay = Math.random() * 2000 + 1000; // Random delay between 1000ms (1s) and 3000ms (3s)
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve({ id, time: (delay / 1000).toFixed(3) });
-            }, delay);
-        });
-    }
+    <h2>Promise Execution Table</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Promise</th>
+                <th>Time Taken (Seconds)</th>
+            </tr>
+        </thead>
+        <tbody id="output">
+            <tr>
+                <td colspan="2">Loading...</td>
+            </tr>
+        </tbody>
+    </table>
 
-    // Create three promises
-    const promises = [createPromise(1), createPromise(2), createPromise(3)];
+    <script>
+        const tableBody = document.getElementById("output");
 
-    // Display the "Loading..." row initially
-    outputTable.innerHTML = `<tr><td colspan="2">Loading...</td></tr>`;
+        function createPromise(index) {
+            return new Promise((resolve) => {
+                const timeTaken = (Math.random() * 2 + 1).toFixed(3); // Random time between 1 and 3 sec
+                setTimeout(() => resolve({ index, timeTaken }), timeTaken * 1000);
+            });
+        }
 
-    // Wait for all promises to resolve
-    Promise.all(promises).then(results => {
-        // Remove the "Loading..." row
-        outputTable.innerHTML = "";
+        function showLoading() {
+            tableBody.innerHTML = `<tr><td colspan="2">Loading...</td></tr>`;
+        }
 
-        // Populate the table with resolved values
-        results.forEach(result => {
-            const row = document.createElement("tr");
-            row.innerHTML = `<td>Promise ${result.id}</td><td>${result.time}</td>`;
-            outputTable.appendChild(row);
-        });
+        function updateTable(results) {
+            tableBody.innerHTML = "";
+            let maxTime = 0;
 
-        // Calculate the maximum time taken (i.e., the longest resolving promise)
-        const maxTime = Math.max(...results.map(r => parseFloat(r.time))).toFixed(3);
+            results.forEach(result => {
+                maxTime = Math.max(maxTime, parseFloat(result.timeTaken));
+                const row = `<tr><td>Promise ${result.index}</td><td>${result.timeTaken}</td></tr>`;
+                tableBody.innerHTML += row;
+            });
 
-        // Add total row
-        const totalRow = document.createElement("tr");
-        totalRow.innerHTML = `<td>Total</td><td>${maxTime}</td>`;
-        outputTable.appendChild(totalRow);
-    });
-});
+            tableBody.innerHTML += `<tr><td>Total</td><td>${maxTime.toFixed(3)}</td></tr>`;
+        }
+
+        function executePromises() {
+            showLoading();
+            const promises = [createPromise(1), createPromise(2), createPromise(3)];
+            Promise.all(promises).then(updateTable);
+        }
+
+        window.onload = executePromises;
+    </script>
+
+</body>
+</html>
